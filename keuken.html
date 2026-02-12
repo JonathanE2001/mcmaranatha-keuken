@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC Maranatha - Keuken</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    padding: 30px;
+}
+
+h1 {
+    color: rgb(255,215,0);
+}
+
+.order {
+    background: #222;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 15px;
+}
+
+button {
+    background: #da291c;
+    color: rgb(255,215,0);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<h1>🍔 Keuken Monitor</h1>
+
+<div id="orders"></div>
+
+<script>
+// 🔥 Zelfde Firebase config gebruiken als je bestelpagina
+const firebaseConfig = {
+  apiKey: "JOUW_API_KEY",
+  authDomain: "jouwdomein.firebaseapp.com",
+  databaseURL: "https://jouwdomein-default-rtdb.firebaseio.com",
+  projectId: "jouwdomein",
+  storageBucket: "jouwdomein.appspot.com",
+  messagingSenderId: "xxxx",
+  appId: "xxxx"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const ordersDiv = document.getElementById("orders");
+
+// Live bestellingen tonen
+db.ref("orders").on("child_added", (snapshot) => {
+
+    const data = snapshot.val();
+    const key = snapshot.key;
+
+    const div = document.createElement("div");
+    div.className = "order";
+    div.id = key;
+
+    div.innerHTML = `
+        <strong>${data.item}</strong><br>
+        ${new Date(data.tijd).toLocaleTimeString()}<br>
+        <button onclick="completeOrder('${key}')">Klaar</button>
+    `;
+
+    ordersDiv.appendChild(div);
+});
+
+// Bestelling verwijderen als hij klaar is
+function completeOrder(orderKey) {
+    db.ref("orders/" + orderKey).remove();
+    document.getElementById(orderKey).remove();
+}
+</script>
+
+</body>
+</html>
