@@ -10,7 +10,7 @@
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #111;
     color: white;
     padding: 30px;
@@ -25,6 +25,13 @@ h1 {
     padding: 20px;
     margin: 10px 0;
     border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-info {
+    max-width: 70%;
 }
 
 button {
@@ -34,7 +41,9 @@ button {
     padding: 8px 15px;
     border-radius: 15px;
     cursor: pointer;
-    margin-top: 10px;
+}
+button:hover {
+    background: #b2221a;
 }
 </style>
 </head>
@@ -45,7 +54,6 @@ button {
 <div id="orders"></div>
 
 <script>
-// 🔥 Zelfde Firebase config gebruiken als je bestelpagina
 const firebaseConfig = { 
   apiKey : "AIzaSyA--6-0cX6qPdUwV0NllkgtAhpm2_SDdJ4" , 
   authDomain : "mcmaranatha-9b500.firebaseapp.com" , 
@@ -56,32 +64,36 @@ const firebaseConfig = {
   appId : "1:305909078179:web:165a92a8abb81ccb0a4716" 
 };
 
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
 const ordersDiv = document.getElementById("orders");
 
-// Live bestellingen tonen
-db.ref("orders").on("child_added", (snapshot) => {
+// Geluid voor nieuwe bestelling
+const audio = new Audio('ding.mp3'); // Zorg dat dit bestand in dezelfde map staat
 
+db.ref("orders").on("child_added", (snapshot) => {
     const data = snapshot.val();
     const key = snapshot.key;
+
+    // Speel het belletje af
+    audio.play();
 
     const div = document.createElement("div");
     div.className = "order";
     div.id = key;
 
     div.innerHTML = `
-        <strong>${data.item}</strong><br>
-        ${new Date(data.tijd).toLocaleTimeString()}<br>
+        <div class="order-info">
+            <strong>${data.item}</strong> <br>
+            <em>Naam: ${data.naam}</em><br>
+            ${new Date(data.tijd).toLocaleTimeString()}
+        </div>
         <button onclick="completeOrder('${key}')">Klaar</button>
     `;
 
     ordersDiv.appendChild(div);
 });
 
-// Bestelling verwijderen als hij klaar is
 function completeOrder(orderKey) {
     db.ref("orders/" + orderKey).remove();
     document.getElementById(orderKey).remove();
@@ -90,5 +102,3 @@ function completeOrder(orderKey) {
 
 </body>
 </html>
-
-
