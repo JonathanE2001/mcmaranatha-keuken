@@ -46,15 +46,16 @@ button {
 
 <script>
 // 🔥 Zelfde Firebase config gebruiken als je bestelpagina
-const firebaseConfig = {
-  apiKey: "JOUW_API_KEY",
-  authDomain: "jouwdomein.firebaseapp.com",
-  databaseURL: "https://jouwdomein-default-rtdb.firebaseio.com",
-  projectId: "jouwdomein",
-  storageBucket: "jouwdomein.appspot.com",
-  messagingSenderId: "xxxx",
-  appId: "xxxx"
+const firebaseConfig = { 
+  apiKey : "AIzaSyA--6-0cX6qPdUwV0NllkgtAhpm2_SDdJ4" , 
+  authDomain : "mcmaranatha-9b500.firebaseapp.com" , 
+  databaseURL : "https://mcmaranatha-9b500-default-rtdb.europe-west1.firebasedatabase.app" , 
+  projectId : "mcmaranatha-9b500" , 
+  storageBucket : "mcmaranatha-9b500.firebasestorage.app" , 
+  messagingSenderId : "305909078179" , 
+  appId : "1:305909078179:web:165a92a8abb81ccb0a4716" 
 };
+
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -89,3 +90,4 @@ function completeOrder(orderKey) {
 
 </body>
 </html>
+
