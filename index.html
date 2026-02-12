@@ -20,14 +20,20 @@ h1 {
     color: rgb(255,215,0);
 }
 
+#orderCount {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
 .order {
-    background: #222;
     padding: 20px;
     margin: 10px 0;
     border-radius: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    opacity: 1;
+    transition: background 1s, opacity 0.5s;
 }
 
 .order-info {
@@ -45,12 +51,31 @@ button {
 button:hover {
     background: #b2221a;
 }
+
+/* Animatie highlight */
+@keyframes highlightOrder {
+    0% { opacity: 0.5; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.highlight {
+    animation: highlightOrder 0.5s ease forwards;
+}
+
+/* Kleuren per burger */
+.vega { background: #6AA84F; color: white; }
+.bb { background: #FFD966; color: black; }
+.diet { background: #93C47D; color: white; }
+.bigmarco { background: #E06666; color: white; }
+.fire { background: #F6B26B; color: black; }
+.elsylvano { background: #8E7CC3; color: white; }
+.alfa { background: #FFD700; color: black; }
+.nuggies { background: #FF9900; color: black; }
 </style>
 </head>
 <body>
 
 <h1>🍔 Keuken Monitor</h1>
-
+<div id="orderCount">Aantal openstaande bestellingen: 0</div>
 <div id="orders"></div>
 
 <script>
@@ -67,19 +92,41 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const ordersDiv = document.getElementById("orders");
+const orderCountDiv = document.getElementById("orderCount");
 
 // Geluid voor nieuwe bestelling
 const audio = new Audio('ding.mp3'); // Zorg dat dit bestand in dezelfde map staat
 
+// Kleur per burger
+function getBurgerClass(item) {
+    switch(item) {
+        case "Vega Burger": return "vega";
+        case "Basic Burger / BB": return "bb";
+        case "Diet Big Mac": return "diet";
+        case "Big Marco": return "bigmarco";
+        case "Fire of the Spirit Burger": return "fire";
+        case "El Sylvano Grande": return "elsylvano";
+        case "Alfa Omega Burger": return "alfa";
+        case "The Power of de Nuggies Tower": return "nuggies";
+        default: return "";
+    }
+}
+
+// Update teller
+function updateOrderCount() {
+    const count = ordersDiv.childElementCount;
+    orderCountDiv.innerText = `Aantal openstaande bestellingen: ${count}`;
+}
+
+// Nieuwe bestelling
 db.ref("orders").on("child_added", (snapshot) => {
     const data = snapshot.val();
     const key = snapshot.key;
 
-    // Speel het belletje af
     audio.play();
 
     const div = document.createElement("div");
-    div.className = "order";
+    div.className = `order highlight ${getBurgerClass(data.item)}`;
     div.id = key;
 
     div.innerHTML = `
@@ -92,11 +139,20 @@ db.ref("orders").on("child_added", (snapshot) => {
     `;
 
     ordersDiv.appendChild(div);
+    updateOrderCount();
+
+    // Verwijder highlight class
+    setTimeout(() => {
+        div.classList.remove("highlight");
+    }, 500);
 });
 
+// Verwijderen bestelling
 function completeOrder(orderKey) {
     db.ref("orders/" + orderKey).remove();
-    document.getElementById(orderKey).remove();
+    const elem = document.getElementById(orderKey);
+    if(elem) elem.remove();
+    updateOrderCount();
 }
 </script>
 
