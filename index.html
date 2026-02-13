@@ -52,11 +52,12 @@ button:hover {
     background: #b2221a;
 }
 
-/* Animatie highlight */
+/* Animatie voor nieuwe bestelling */
 @keyframes highlightOrder {
     0% { opacity: 0.5; transform: scale(0.95); }
     100% { opacity: 1; transform: scale(1); }
 }
+
 .highlight {
     animation: highlightOrder 0.5s ease forwards;
 }
@@ -70,6 +71,8 @@ button:hover {
 .elsylvano { background: #8E7CC3; color: white; }
 .alfa { background: #FFD700; color: black; }
 .nuggies { background: #FF9900; color: black; }
+.ccc { background: #FFCC99; color: black; }
+.mcminion { background: #99CCFF; color: black; }
 </style>
 </head>
 <body>
@@ -95,7 +98,7 @@ const ordersDiv = document.getElementById("orders");
 const orderCountDiv = document.getElementById("orderCount");
 
 // Geluid voor nieuwe bestelling
-const audio = new Audio('ding.mp3'); // Zorg dat dit bestand in dezelfde map staat
+const audio = new Audio('ding.mp3'); // Plaats dit bestand in dezelfde map
 
 // Kleur per burger
 function getBurgerClass(item) {
@@ -108,6 +111,8 @@ function getBurgerClass(item) {
         case "El Sylvano Grande": return "elsylvano";
         case "Alfa Omega Burger": return "alfa";
         case "The Power of de Nuggies Tower": return "nuggies";
+        case "CCC (Christian Crispy Chicken)": return "ccc";
+        case "McMinion": return "mcminion";
         default: return "";
     }
 }
@@ -126,13 +131,19 @@ db.ref("orders").on("child_added", (snapshot) => {
     audio.play();
 
     const div = document.createElement("div");
-    div.className = `order highlight ${getBurgerClass(data.item)}`;
+    div.className = "order highlight " + getBurgerClass(data.item);
     div.id = key;
+
+    let extra = "";
+    if(data.item === "CCC (Christian Crispy Chicken)" && data.saus) {
+        extra = `<br><strong>Saus:</strong> ${Array.isArray(data.saus) ? data.saus.join(", ") : data.saus}`;
+    }
 
     div.innerHTML = `
         <div class="order-info">
-            <strong>${data.item}</strong> <br>
-            <em>Naam: ${data.naam}</em><br>
+            <strong>${data.item}</strong><br>
+            <em>Naam: ${data.naam}</em>
+            ${extra}<br>
             ${new Date(data.tijd).toLocaleTimeString()}
         </div>
         <button onclick="completeOrder('${key}')">Klaar</button>
@@ -141,13 +152,12 @@ db.ref("orders").on("child_added", (snapshot) => {
     ordersDiv.appendChild(div);
     updateOrderCount();
 
-    // Verwijder highlight class
     setTimeout(() => {
         div.classList.remove("highlight");
     }, 500);
 });
 
-// Verwijderen bestelling
+// Bestelling afronden
 function completeOrder(orderKey) {
     db.ref("orders/" + orderKey).remove();
     const elem = document.getElementById(orderKey);
